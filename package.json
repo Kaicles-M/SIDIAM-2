@@ -5,15 +5,24 @@
   "scripts": {
     "start:backend": "node src/backend/index.js",
     "start:frontend": "cd src/frontend && npm run dev",
-    "dev": "concurrently \"nodemon src/backend/index.js\" \"cd src/frontend && npm run dev\""
+    "dev": "concurrently \"nodemon src/backend/index.js\" \"cd src/frontend && npm run dev\"",
+    "test": "jest"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.3",
+    "knex": "^3.2.10",
+    "mongoose": "^9.6.3",
+    "pg": "^8.21.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "concurrently": "^8.2.0",
+    "jest": "^30.4.2",
     "nodemon": "^2.0.22",
-    "concurrently": "^8.2.0"
+    "supertest": "^7.2.2"
   }
 }

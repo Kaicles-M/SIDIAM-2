@@ -35,11 +35,11 @@ A Plataforma SIDIAM (Sistema de Diagnóstico em Matemática) é uma solução qu
 
 **Decisão:** Sistema de autenticação baseado em email/senha com roles hierárquicos.
 
-**Contexto:** Professores podem atuar em múltiplas escolas; coordenadores e admins precisam de escopos distintos.
+**Contexto:** Professores podem atuar em múltiplas escolas; admins precisam de escopos distintos.
 
 **Detalhes:**
 
-- **Tabela `users`:** `id` (UUID), `email` (unique), `password_hash`, `role` (teacher | coordinator | admin)
+- **Tabela `users`:** `id` (UUID), `email` (unique), `password_hash`, `role` (teacher | admin)
 - **Tabela `school_memberships`:** Associação usuário–escola com `role_in_school` e `status`
 - Permite um professor ter acesso a mais de uma escola/rede no futuro
 - Recuperação de senha via token temporário (expira em ~1h)
@@ -47,7 +47,6 @@ A Plataforma SIDIAM (Sistema de Diagnóstico em Matemática) é uma solução qu
 **Alternativas consideradas:**
 
 - OAuth externo (Google/Microsoft): deixado para fase posterior
-- SSO institucional: considerado para redes estaduais/municipais em versão futura
 
 ---
 
@@ -258,7 +257,7 @@ A fórmula matemática completa pode ser refinada em iteração futura; o docume
 
 **Decisão:** A plataforma oferecerá, de forma opcional, um modo de identificação pedagógica baseado em mapa da sala de aula, no qual cada posição do ambiente pode funcionar como identificador do estudante ou do assento.
 
-**Contexto:** Em ambientes escolares, a organização física da sala segue um padrão estável de assentos. Algumas instituições adotam políticas rigorosas de privacidade e preferem evitar o armazenamento direto de nomes. A posição do aluno no mapa pode funcionar como identificador pedagógico opcional (pseudonimização) e como ferramenta visual de diagnóstico.
+**Contexto:** Em ambientes escolares, a organização física da sala segue um padrão estável de assentos. Alguns contextos exigem políticas rigorosas de privacidade e preferem evitar o armazenamento direto de nomes. A posição do aluno no mapa pode funcionar como identificador pedagógico opcional (pseudonimização) e como ferramenta visual de diagnóstico.
 
 **Detalhes do modo:**
 
@@ -430,4 +429,8 @@ student_mastery ── students, topics/skills
 
 ---
 
-*Este ADR deve ser revisado conforme o projeto avança e novas decisões forem tomadas.*
+*Este ADR deve ser revisado conforme o projeto avança e novas decisões forem tomadas.*lidades)
+
+---
+
+*Este ADR deve ser revisado conforme o projeto avança e novas decisões forem tomadas.*madas.*

@@ -360,7 +360,7 @@ O MVP deve entregar pelo menos os seguintes resultados:
 
 ---
 
-## 12. Itens Fora do Escopo Inicial
+### 12. Itens Fora do Escopo Inicial
 
 Ficam fora da primeira versao:
 
@@ -369,9 +369,9 @@ Ficam fora da primeira versao:
 - importacao automatica de questoes por link ou scraping
 - questoes discursivas
 - recomendacao automatica de intervencao pedagogica
-- edicao institucional de banco de questoes
 - mapas de sala completos e interativos
 - analises avancadas de IA em producao
+
 
 Esses itens continuam relevantes para fases posteriores.
 

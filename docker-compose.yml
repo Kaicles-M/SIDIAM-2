@@ -1,0 +1,29 @@
+services:
+  db_postgres:
+    image: postgres:15
+    container_name: sidiam_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: sidiam_user
+      POSTGRES_PASSWORD: sidiam_password
+      POSTGRES_DB: sidiam_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  db_mongo:
+    image: mongo:6
+    container_name: sidiam_mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin_password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  postgres_data:
+  mongo_data:
