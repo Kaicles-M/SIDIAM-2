@@ -1,6 +1,8 @@
 /**
  * @type { Object.<string, import("knex").Knex.Config> }
  */
+require('dotenv').config({ path: './src/backend/.env' });
+
 module.exports = {
   development: {
     client: 'postgresql',

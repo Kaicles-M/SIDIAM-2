@@ -60,52 +60,53 @@ export default function ClassesPage() {
   return (
     <div className="page-container">
       <h1 className="page-title">Turmas</h1>
+      
       <div className="card">
-        <h3>Criar Nova Turma</h3>
+        <h3>Criar Turma</h3>
         <form onSubmit={handleSubmit}>
-          <div className="field">
-            <label>Nome da turma</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex.: 5º ano A" required />
-          </div>
-          <div className="field">
-            <label>Série / ano</label>
-            <input value={yearGrade} onChange={(e) => setYearGrade(e.target.value)} placeholder="Ex.: 5º ano" required />
-          </div>
-          <div className="field">
-            <label>Escola</label>
-            <select value={schoolId} onChange={(e) => setSchoolId(e.target.value)} required>
-              <option value="">Selecione uma escola</option>
-              {schools.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="field">
-            <button type="submit">Criar turma</button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '20px', alignItems: 'flex-end' }}>
+            <div className="field" style={{ marginBottom: 0 }}>
+              <label>Nome da Turma</label>
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: 6º Ano A" required />
+            </div>
+            <div className="field" style={{ marginBottom: 0 }}>
+              <label>Série / Ano</label>
+              <input value={yearGrade} onChange={(e) => setYearGrade(e.target.value)} placeholder="Ex: 6º Ano" required />
+            </div>
+            <div className="field" style={{ marginBottom: 0 }}>
+              <label>Escola</label>
+              <select value={schoolId} onChange={(e) => setSchoolId(e.target.value)} required>
+                <option value="">Selecione...</option>
+                {schools.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+            <button type="submit" className="btn-primary" style={{ width: 'auto' }}>Criar</button>
           </div>
         </form>
       </div>
       
       <div className="card">
-        <h3>Minhas Turmas</h3>
+        <h3>Lista de Turmas</h3>
         {loading ? (
-          <p>Carregando turmas...</p>
+          <p className="small-text">Carregando...</p>
         ) : (
           <ul className="list">
             {classes.length === 0 ? (
-              <p>Nenhuma turma cadastrada ainda.</p>
+              <p className="small-text">Nenhuma turma cadastrada.</p>
             ) : (
               classes.map((klass) => {
                 const school = schools.find((s) => s.id === klass.school_id);
                 return (
                   <li key={klass.id} className="list-item">
                     <div>
-                      <strong>{klass.name}</strong>
+                      <strong style={{ fontSize: '1.05rem' }}>{klass.name}</strong>
                       <div className="small-text">{klass.year_grade}</div>
                     </div>
-                    <span className="small-text">{school ? school.name : 'Sem escola'}</span>
+                    <span className="badge active" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
+                      {school ? school.name : 'Sem escola'}
+                    </span>
                   </li>
                 );
               })

@@ -1,5 +1,8 @@
 const request = require('supertest');
 const app = require('../index');
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecret';
 
 describe('SIDIAM API Smoke Tests', () => {
   it('should return health status ok', async () => {
@@ -14,6 +17,11 @@ describe('SIDIAM API Smoke Tests', () => {
       .post('/api/users')
       .send({ name: 'Professor Teste', email: 'test@sidiam.com' });
     const teacherId = userRes.body.id;
+    const teacherName = userRes.body.name;
+    const teacherRole = userRes.body.role;
+
+    // Gerar token JWT para o professor
+    const token = jwt.sign({ id: teacherId, name: teacherName, role: teacherRole }, JWT_SECRET, { expiresIn: '8h' });
 
     // 2. Criar turma
     const classRes = await request(app)
@@ -44,13 +52,16 @@ describe('SIDIAM API Smoke Tests', () => {
     };
     const recordRes = await request(app)
       .post('/api/pedagogical-records')
+      .set('Authorization', `Bearer ${token}`)
       .send(recordPayload);
     
     expect(recordRes.statusCode).toEqual(201);
     expect(recordRes.body).toHaveProperty('topic', 'Matemática Básica');
 
     // 6. Listar registros por turma
-    const listRes = await request(app).get(`/api/classes/${classId}/records`);
+    const listRes = await request(app)
+      .get(`/api/classes/${classId}/records`)
+      .set('Authorization', `Bearer ${token}`);
     expect(listRes.statusCode).toEqual(200);
     expect(listRes.body.length).toBeGreaterThan(0);
     expect(listRes.body[0].student_id).toBe(studentId);

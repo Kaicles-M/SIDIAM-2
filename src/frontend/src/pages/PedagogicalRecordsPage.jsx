@@ -6,7 +6,8 @@ export default function PedagogicalRecordsPage() {
   const [records, setRecords] = useState([]);
   
   const [selectedClass, setSelectedClass] = useState('');
-  const [selectedStudent, setSelectedStudent] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  
   const [topic, setTopic] = useState('');
   const [category, setCategory] = useState('operacional');
   const [importance, setImportance] = useState('media');
@@ -40,6 +41,8 @@ export default function PedagogicalRecordsPage() {
       })
         .then((res) => res.json())
         .then((data) => setRecords(data));
+      
+      setSelectedStudent(null);
     } else {
       setStudents([]);
       setRecords([]);
@@ -48,8 +51,10 @@ export default function PedagogicalRecordsPage() {
 
   function handleSubmit(event) {
     event.preventDefault();
+    if (!selectedStudent) return;
+
     const payload = {
-      student_id: selectedStudent,
+      student_id: selectedStudent.id,
       class_id: selectedClass,
       topic,
       category,
@@ -69,151 +74,144 @@ export default function PedagogicalRecordsPage() {
       .then((res) => res.json())
       .then((newRecord) => {
         setRecords((prev) => [newRecord, ...prev]);
-        // Reset form partially
-        setSelectedStudent('');
         setTopic('');
         setDescription('');
         setActionTaken('');
+        setSelectedStudent(null);
+        alert('Registro salvo com sucesso!');
       });
   }
 
   return (
     <div className="page-container">
-      <h1 className="page-title">Registros Pedagógicos</h1>
+      <h1 className="page-title">Diário Pedagógico</h1>
       
       <div className="card">
-        <h3>Novo Registro</h3>
-        <form onSubmit={handleSubmit}>
-          <div className="field">
-            <label>Turma</label>
-            <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)} required>
-              <option value="">Selecione a turma</option>
-              {classes.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {selectedClass && (
-            <>
-              <div className="field">
-                <label>Aluno</label>
-                <select value={selectedStudent} onChange={(e) => setSelectedStudent(e.target.value)} required>
-                  <option value="">Selecione o aluno</option>
-                  {students.map((s) => (
-                    <option key={s.id} value={s.id}>{s.display_name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="field">
-                <label>Tópico / Conteúdo</label>
-                <input 
-                  value={topic} 
-                  onChange={(e) => setTopic(e.target.value)} 
-                  placeholder="Ex: Frações, Equações..." 
-                  required 
-                />
-              </div>
-
-              <div className="field">
-                <label>Categoria de Erro</label>
-                <select value={category} onChange={(e) => setCategory(e.target.value)}>
-                  <option value="operacional">Operacional</option>
-                  <option value="conceitual">Conceitual</option>
-                  <option value="interpretativo">Interpretativo</option>
-                  <option value="estrategico">Estratégico</option>
-                </select>
-              </div>
-
-              <div className="field">
-                <label>Importância</label>
-                <select value={importance} onChange={(e) => setImportance(e.target.value)}>
-                  <option value="baixa">Baixa</option>
-                  <option value="media">Média</option>
-                  <option value="alta">Alta</option>
-                </select>
-              </div>
-
-              <div className="field">
-                <label>Descrição / Observação</label>
-                <textarea 
-                  value={description} 
-                  onChange={(e) => setDescription(e.target.value)} 
-                  placeholder="Descreva a dificuldade ou ponto forte..."
-                  style={{ width: '100%', minHeight: '80px', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
-
-              <div className="field">
-                <label>Ação Pedagógica</label>
-                <textarea 
-                  value={actionTaken} 
-                  onChange={(e) => setActionTaken(e.target.value)} 
-                  placeholder="O que foi feito para intervir?"
-                  style={{ width: '100%', minHeight: '80px', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
-
-              <div className="field">
-                <button type="submit">Salvar Registro</button>
-              </div>
-            </>
-          )}
-        </form>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label>Selecione a Turma para trabalhar:</label>
+          <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)} required style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+            <option value="">Escolha uma turma...</option>
+            {classes.map((c) => (
+              <option key={c.id} value={c.id}>{c.name}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      <div className="card">
-        <h3>Registros da Turma</h3>
-        {loading ? (
-          <p>Carregando...</p>
-        ) : (
+      {selectedClass && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '32px' }}>
+          
+          {/* Lista de Alunos da Turma */}
+          <div className="card">
+            <h3>Alunos</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {students.map(s => (
+                <button 
+                  key={s.id}
+                  onClick={() => setSelectedStudent(s)}
+                  style={{
+                    padding: '12px',
+                    textAlign: 'left',
+                    borderRadius: '8px',
+                    border: selectedStudent?.id === s.id ? '2px solid var(--primary)' : '1px solid var(--border)',
+                    background: selectedStudent?.id === s.id ? 'var(--primary-light)' : 'white',
+                    cursor: 'pointer',
+                    fontWeight: selectedStudent?.id === s.id ? '700' : '400'
+                  }}
+                >
+                  {s.display_name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Área de Registro ou Lista de Registros */}
           <div>
-            {!selectedClass ? (
-              <p>Selecione uma turma para ver os registros.</p>
+            {selectedStudent ? (
+              <div className="card" style={{ borderTop: '4px solid var(--primary)' }}>
+                <h3>Novo Registro para: <span style={{ color: 'var(--primary)' }}>{selectedStudent.display_name}</span></h3>
+                <form onSubmit={handleSubmit}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div className="field">
+                      <label>Tópico / Conteúdo</label>
+                      <input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Ex: Frações" required />
+                    </div>
+                    <div className="field">
+                      <label>Gravidade / Importância</label>
+                      <select value={importance} onChange={(e) => setImportance(e.target.value)}>
+                        <option value="baixa">Baixa (Observação)</option>
+                        <option value="media">Média (Atenção)</option>
+                        <option value="alta">Alta (Crítico)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="field">
+                    <label>Categoria da Dificuldade</label>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      {['operacional', 'conceitual', 'interpretativo', 'estrategico'].map(cat => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setCategory(cat)}
+                          style={{
+                            padding: '8px 16px',
+                            borderRadius: '20px',
+                            border: '1px solid var(--border)',
+                            background: category === cat ? 'var(--primary)' : 'white',
+                            color: category === cat ? 'white' : 'var(--text-main)',
+                            cursor: 'pointer',
+                            textTransform: 'capitalize'
+                          }}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="field">
+                    <label>O que você observou?</label>
+                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalhes da dificuldade..." style={{ minHeight: '80px' }} />
+                  </div>
+
+                  <div className="field">
+                    <label>Ação Tomada (Opcional)</label>
+                    <textarea value={actionTaken} onChange={(e) => setActionTaken(e.target.value)} placeholder="Ex: Reforço, material extra..." style={{ minHeight: '60px' }} />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '12px' }}>
+                    <button type="submit" className="btn-primary">Salvar Registro</button>
+                    <button type="button" onClick={() => setSelectedStudent(null)} className="btn-logout" style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--secondary)' }}>Cancelar</button>
+                  </div>
+                </form>
+              </div>
             ) : (
-              <ul className="list" style={{ listStyle: 'none', padding: 0 }}>
-                {records.length === 0 ? (
-                  <p>Nenhum registro encontrado para esta turma.</p>
-                ) : (
-                  records.map((r) => {
-                    const student = students.find((s) => s.id === r.student_id);
+              <div className="card">
+                <h3>Registros Recentes da Turma</h3>
+                <ul className="list">
+                  {records.length === 0 ? <p className="small-text">Nenhum registro nesta turma ainda.</p> : records.map(r => {
+                    const student = students.find(s => s.id === r.student_id);
                     return (
                       <li key={r.id} className="list-item" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '4px' }}>
-                          <span style={{ fontWeight: 'bold' }}>{student?.display_name || 'Aluno desconhecido'}</span>
-                          <span className={`badge ${r.importance}`} style={{ 
-                            background: r.importance === 'alta' ? '#fee2e2' : r.importance === 'media' ? '#fef9c3' : '#f1f5f9',
-                            color: r.importance === 'alta' ? '#991b1b' : r.importance === 'media' ? '#854d0e' : '#475569'
-                          }}>
-                            {r.category} • {r.importance}
-                          </span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                          <strong>{student?.display_name}</strong>
+                          <span className={`badge ${r.importance}`}>{r.importance}</span>
                         </div>
-                        <div style={{ marginBottom: '4px' }}>
-                          <span className="small-text" style={{ fontWeight: 'bold' }}>Tópico:</span> {r.topic}
+                        <div className="small-text" style={{ marginTop: '4px' }}>
+                          <span style={{ color: 'var(--primary)', fontWeight: '600' }}>{r.topic}</span> • {r.category}
                         </div>
-                        {r.description && (
-                          <div style={{ marginBottom: '4px' }}>
-                            <span className="small-text" style={{ fontWeight: 'bold' }}>Obs:</span> {r.description}
-                          </div>
-                        )}
-                        {r.action_taken && (
-                          <div>
-                            <span className="small-text" style={{ fontWeight: 'bold' }}>Ação:</span> {r.action_taken}
-                          </div>
-                        )}
-                        <span className="small-text" style={{ marginTop: '8px', opacity: 0.6 }}>
-                          {new Date(r.created_at).toLocaleString()}
-                        </span>
+                        {r.description && <p style={{ margin: '8px 0', fontSize: '0.9rem' }}>{r.description}</p>}
                       </li>
                     );
-                  })
-                )}
-              </ul>
+                  })}
+                </ul>
+              </div>
             )}
           </div>
-        )}
-      </div>
+
+        </div>
+      )}
     </div>
   );
 }
