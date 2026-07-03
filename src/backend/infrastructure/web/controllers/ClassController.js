@@ -3,12 +3,14 @@ class ClassController {
     createClassUseCase,
     getClassUseCase,
     listClassesUseCase,
+    deleteClassUseCase,
     enrollStudentUseCase,
     listStudentsByClassUseCase
   ) {
     this.createClassUseCase = createClassUseCase;
     this.getClassUseCase = getClassUseCase;
     this.listClassesUseCase = listClassesUseCase;
+    this.deleteClassUseCase = deleteClassUseCase;
     this.enrollStudentUseCase = enrollStudentUseCase;
     this.listStudentsByClassUseCase = listStudentsByClassUseCase;
   }
@@ -24,9 +26,9 @@ class ClassController {
   }
 
   async create(req, res) {
-    const { name, year_grade, teacher_id } = req.body;
+    const { name, year_grade, teacher_id, school_id } = req.body;
     try {
-      const c = await this.createClassUseCase.execute({ name, year_grade, teacher_id });
+      const c = await this.createClassUseCase.execute({ name, year_grade, teacher_id, school_id });
       res.status(201).json(c);
     } catch (err) {
       const statusCode = err.statusCode || 500;
@@ -38,6 +40,16 @@ class ClassController {
     try {
       const c = await this.getClassUseCase.execute(req.params.id);
       res.json(c);
+    } catch (err) {
+      const statusCode = err.statusCode || 500;
+      res.status(statusCode).json({ error: err.message });
+    }
+  }
+
+  async remove(req, res) {
+    try {
+      await this.deleteClassUseCase.execute(req.params.id);
+      res.status(200).json({ success: true });
     } catch (err) {
       const statusCode = err.statusCode || 500;
       res.status(statusCode).json({ error: err.message });

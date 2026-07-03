@@ -1,4 +1,4 @@
-const db = require('./src/backend/db');
+const db = require('./src/backend/infrastructure/database/db');
 const { v4: uuidv4 } = require('uuid');
 
 async function seed() {
@@ -18,6 +18,8 @@ async function seed() {
     await db('students').del();
     await db('classes').del();
     await db('users').del();
+    await db('intervention_templates').del();
+    await db('bncc_reference').del();
 
     // 2. Criar Professor com Senha
     const teacherId = uuidv4();
@@ -120,6 +122,26 @@ async function seed() {
       grade_level: '6º Ano'
     });
 
+    // 7.1 Criar Referencial BNCC (bncc_reference)
+    await db('bncc_reference').insert([
+      {
+        id: uuidv4(),
+        level: 'Fundamental',
+        grade: '6º Ano',
+        code: 'EF06MA07',
+        description: 'Compreender, comparar e ordenar frações associadas às ideias de partes de inteiros e resultado de divisão.',
+        topic: 'Números'
+      },
+      {
+        id: uuidv4(),
+        level: 'Fundamental',
+        grade: '6º Ano',
+        code: 'EF06MA01',
+        description: 'Resolver e elaborar problemas com números naturais, envolvendo as quatro operações fundamentais.',
+        topic: 'Números'
+      }
+    ]);
+
     // 8. Criar Questões
     const questionId = uuidv4();
     await db('questions').insert({
@@ -162,6 +184,38 @@ async function seed() {
       question_id: questionId,
       order_index: 1
     });
+
+    // 10. Criar Modelos de Intervenção Pedagógica (Intervention Templates)
+    const interventions = [
+      {
+        id: uuidv4(),
+        topic: 'Frações',
+        category: 'conceitual',
+        skill_code: 'EF06MA07',
+        title: 'Uso de Círculos de Frações (Material Concreto)',
+        description_plan: 'Trabalhar a representação visual de frações usando círculos ou tiras de papel fracionadas para reforçar o conceito de parte-todo.',
+        recommended_resources: 'Círculos de frações impressos, tesoura, lápis de cor.'
+      },
+      {
+        id: uuidv4(),
+        topic: 'Frações',
+        category: 'operacional',
+        skill_code: 'EF06MA07',
+        title: 'Prática de Algoritmo de Multiplicação de Frações',
+        description_plan: 'Explicar passo a passo a multiplicação de numeradores e denominadores com exemplos simples e exercícios graduais.',
+        recommended_resources: 'Folha de exercícios direcionados de multiplicação de frações.'
+      },
+      {
+        id: uuidv4(),
+        topic: 'Números Decimais',
+        category: 'conceitual',
+        skill_code: 'EF06MA01',
+        title: 'Quadro de Valor Posicional (QVP) com Decimais',
+        description_plan: 'Utilizar o quadro valor de lugar para ilustrar a posição dos décimos, centésimos e milésimos à direita da vírgula.',
+        recommended_resources: 'Quadro negro ou cartolina com QVP, fichas numéricas.'
+      }
+    ];
+    await db('intervention_templates').insert(interventions);
 
     console.log('Semeio concluído com sucesso!');
   } catch (err) {

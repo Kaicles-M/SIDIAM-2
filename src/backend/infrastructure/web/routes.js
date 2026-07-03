@@ -15,6 +15,7 @@ const SkillController = require('./controllers/SkillController');
 const QuestionController = require('./controllers/QuestionController');
 const AssessmentController = require('./controllers/AssessmentController');
 const BNCCController = require('./controllers/BNCCController');
+const InterventionController = require('./controllers/InterventionController');
 
 const authCtrl = new AuthController(
   container.registerUseCase,
@@ -23,7 +24,8 @@ const authCtrl = new AuthController(
 );
 const schoolCtrl = new SchoolController(
   container.createSchoolUseCase,
-  container.listUserSchoolsUseCase
+  container.listUserSchoolsUseCase,
+  container.deleteSchoolUseCase
 );
 const userCtrl = new UserController(
   container.createUserUseCase,
@@ -34,13 +36,15 @@ const classCtrl = new ClassController(
   container.createClassUseCase,
   container.getClassUseCase,
   container.listClassesUseCase,
+  container.deleteClassUseCase,
   container.enrollStudentUseCase,
   container.listStudentsByClassUseCase
 );
 const studentCtrl = new StudentController(
   container.createStudentUseCase,
   container.getStudentUseCase,
-  container.listStudentsUseCase
+  container.listStudentsUseCase,
+  container.deleteStudentUseCase
 );
 const pedagogicalRecordCtrl = new PedagogicalRecordController(
   container.createPedagogicalRecordUseCase,
@@ -69,6 +73,10 @@ const assessmentCtrl = new AssessmentController(
 const bnccCtrl = new BNCCController(
   container.listBNCCUseCase
 );
+const interventionCtrl = new InterventionController(
+  container.createInterventionTemplateUseCase,
+  container.listInterventionTemplatesUseCase
+);
 
 // Health Check
 router.get('/health', (req, res) => res.json({ status: 'ok', db: 'connected' }));
@@ -81,6 +89,7 @@ router.get('/auth/me', authenticate, (req, res) => authCtrl.me(req, res));
 // School Routes
 router.get('/schools', authenticate, (req, res) => schoolCtrl.list(req, res));
 router.post('/schools', authenticate, (req, res) => schoolCtrl.create(req, res));
+router.delete('/schools/:id', authenticate, (req, res) => schoolCtrl.remove(req, res));
 
 // User Routes
 router.get('/users', authenticate, (req, res) => userCtrl.list(req, res));
@@ -91,6 +100,7 @@ router.get('/users/:id', (req, res) => userCtrl.get(req, res));
 router.get('/classes', (req, res) => classCtrl.list(req, res));
 router.post('/classes', (req, res) => classCtrl.create(req, res));
 router.get('/classes/:id', (req, res) => classCtrl.get(req, res));
+router.delete('/classes/:id', authenticate, (req, res) => classCtrl.remove(req, res));
 router.post('/classes/:classId/enroll', (req, res) => classCtrl.enroll(req, res));
 router.get('/classes/:classId/students', (req, res) => classCtrl.listStudents(req, res));
 
@@ -98,6 +108,7 @@ router.get('/classes/:classId/students', (req, res) => classCtrl.listStudents(re
 router.get('/students', (req, res) => studentCtrl.list(req, res));
 router.post('/students', (req, res) => studentCtrl.create(req, res));
 router.get('/students/:id', (req, res) => studentCtrl.get(req, res));
+router.delete('/students/:id', authenticate, (req, res) => studentCtrl.remove(req, res));
 
 // Pedagogical Record Routes
 router.post('/pedagogical-records', authenticate, (req, res) => pedagogicalRecordCtrl.create(req, res));
@@ -125,5 +136,9 @@ router.post('/assessment-versions/:id/questions', authenticate, (req, res) => as
 
 // BNCC Routes
 router.get('/bncc', authenticate, (req, res) => bnccCtrl.list(req, res));
+
+// Intervention Template Routes
+router.get('/intervention-templates', authenticate, (req, res) => interventionCtrl.list(req, res));
+router.post('/intervention-templates', authenticate, (req, res) => interventionCtrl.create(req, res));
 
 module.exports = router;

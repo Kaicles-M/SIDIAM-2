@@ -14,6 +14,10 @@ class SchoolRepository {
   async listUserSchools(userId) {
     throw new Error('Method not implemented');
   }
+
+  async deleteSchool(id) {
+    throw new Error('Method not implemented');
+  }
 }
 
 module.exports = SchoolRepository;

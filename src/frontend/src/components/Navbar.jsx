@@ -1,11 +1,9 @@
 import { NavLink } from 'react-router-dom';
+import { clearAuthSession } from '../utils/api';
 
 const navItems = [
   { path: '/', label: 'Painel Geral' },
-  { path: '/schools', label: 'Escolas' },
-  { path: '/classes', label: 'Turmas' },
-  { path: '/students', label: 'Alunos' },
-  { path: '/records', label: 'Registros' },
+  { path: '/schools', label: 'Gestão Pedagógica' },
   { path: '/questions', label: 'Questões' },
   { path: '/assessments', label: 'Avaliações' },
   { path: '/bncc', label: 'BNCC' }
@@ -13,9 +11,8 @@ const navItems = [
 
 export default function Navbar() {
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.reload();
+    clearAuthSession();
+    window.location.assign('/login');
   };
 
   return (

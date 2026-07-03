@@ -1,26 +1,93 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { apiFetch, clearAuthSession, getStoredToken } from '../utils/api';
+
+const emptyStats = {
+  totalStudents: 0,
+  totalRecords: 0,
+  criticalStudents: [],
+  topicStats: [],
+  categoryStats: []
+};
 
 export default function HomePage() {
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState(emptyStats);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('/api/dashboard/stats', {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setStats(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Error fetching dashboard stats:', err);
-        setLoading(false);
-      });
-  }, []);
+    let cancelled = false;
+    const token = getStoredToken();
+
+    if (!token) {
+      setStats(emptyStats);
+      setError('Faça login para visualizar o dashboard.');
+      setLoading(false);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const fetchStats = async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const res = await apiFetch('/api/dashboard/stats');
+
+        if (cancelled) {
+          return;
+        }
+
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+
+          if (res.status === 401 || res.status === 403) {
+            clearAuthSession();
+            setStats(emptyStats);
+            setError('Sua sessão expirou. Faça login novamente.');
+            navigate('/login');
+            return;
+          }
+
+          throw new Error(payload.error || 'Não foi possível carregar os dados do dashboard.');
+        }
+
+        const data = await res.json();
+
+        if (!cancelled) {
+          setStats({
+            totalStudents: data?.totalStudents ?? 0,
+            totalRecords: data?.totalRecords ?? 0,
+            criticalStudents: Array.isArray(data?.criticalStudents) ? data.criticalStudents : [],
+            topicStats: Array.isArray(data?.topicStats) ? data.topicStats : [],
+            categoryStats: Array.isArray(data?.categoryStats) ? data.categoryStats : []
+          });
+          setError('');
+        }
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Error fetching dashboard stats:', err);
+          setStats(emptyStats);
+          setError(err.message || 'Erro ao carregar dados do dashboard.');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchStats();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
 
   if (loading) return <div className="page-container"><p>Carregando diagnóstico...</p></div>;
-  if (!stats) return <div className="page-container"><p>Erro ao carregar dados do dashboard.</p></div>;
+  if (error) return <div className="page-container"><div className="card" style={{ maxWidth: '560px' }}><p>{error}</p></div></div>;
 
   return (
     <div className="page-container dashboard">
@@ -29,16 +96,16 @@ export default function HomePage() {
       <div className="stats-grid">
         <div className="card stat-card">
           <div className="stat-label">Total de Alunos</div>
-          <div className="stat-value" style={{ color: 'var(--primary)' }}>{stats.totalStudents || 0}</div>
+          <div className="stat-value" style={{ color: 'var(--primary)' }}>{stats.totalStudents}</div>
         </div>
         <div className="card stat-card">
           <div className="stat-label">Registros Realizados</div>
-          <div className="stat-value" style={{ color: 'var(--success)' }}>{stats.totalRecords || 0}</div>
+          <div className="stat-value" style={{ color: 'var(--success)' }}>{stats.totalRecords}</div>
         </div>
         <div className="card stat-card">
           <div className="stat-label">Erros Conceituais</div>
           <div className="stat-value" style={{ color: 'var(--danger)' }}>
-            {stats.categoryStats?.find(c => c.category === 'conceitual')?.count || 0}
+            {stats.categoryStats.find(c => c.category === 'conceitual')?.count || 0}
           </div>
         </div>
       </div>

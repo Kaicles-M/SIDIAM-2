@@ -3,9 +3,11 @@ import { useEffect, useState } from 'react';
 export default function StudentsPage() {
   const [students, setStudents] = useState([]);
   const [schools, setSchools] = useState([]);
+  const [classes, setClasses] = useState([]);
   const [displayName, setDisplayName] = useState('');
   const [externalCode, setExternalCode] = useState('');
   const [schoolId, setSchoolId] = useState('');
+  const [classId, setClassId] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedStudentRecords, setSelectedStudentRecords] = useState(null);
   const [currentStudentName, setCurrentStudentName] = useState('');
@@ -15,16 +17,19 @@ export default function StudentsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [studentsRes, schoolsRes] = await Promise.all([
+        const [studentsRes, schoolsRes, classesRes] = await Promise.all([
           fetch('/api/students', { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch('/api/schools', { headers: { 'Authorization': `Bearer ${token}` } })
+          fetch('/api/schools', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch('/api/classes', { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
         
         const studentsData = await studentsRes.json();
         const schoolsData = await schoolsRes.json();
+        const classesData = await classesRes.json();
         
         setStudents(studentsData);
         setSchools(schoolsData);
+        setClasses(classesData);
       } catch (err) {
         console.error('Erro ao buscar dados:', err);
       } finally {
@@ -43,27 +48,46 @@ export default function StudentsPage() {
       .then((data) => setSelectedStudentRecords(data));
   }
 
-  function handleSubmit(event) {
+  const availableClasses = classes.filter(c => c.school_id === schoolId);
+
+  async function handleSubmit(event) {
     event.preventDefault();
-    fetch('/api/students', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ 
-        display_name: displayName, 
-        external_code: externalCode,
-        school_id: schoolId 
-      })
-    })
-      .then((res) => res.json())
-      .then((student) => {
-        setStudents((prev) => [...prev, student]);
-        setDisplayName('');
-        setExternalCode('');
-        setSchoolId('');
+    try {
+      const res = await fetch('/api/students', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          display_name: displayName, 
+          external_code: externalCode,
+          school_id: schoolId 
+        })
       });
+      
+      const student = await res.json();
+      
+      if (classId) {
+        await fetch(`/api/classes/${classId}/enroll`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ student_id: student.id })
+        });
+      }
+
+      setStudents((prev) => [...prev, student]);
+      setDisplayName('');
+      setExternalCode('');
+      setSchoolId('');
+      setClassId('');
+    } catch (err) {
+      console.error('Erro ao cadastrar aluno:', err);
+      alert('Erro ao cadastrar aluno.');
+    }
   }
 
   return (
@@ -108,7 +132,7 @@ export default function StudentsPage() {
           </div>
           <div className="field">
             <label>Escola</label>
-            <select value={schoolId} onChange={(e) => setSchoolId(e.target.value)} required>
+            <select value={schoolId} onChange={(e) => { setSchoolId(e.target.value); setClassId(''); }} required>
               <option value="">Selecione uma escola</option>
               {schools.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -117,6 +141,19 @@ export default function StudentsPage() {
               ))}
             </select>
           </div>
+          {schoolId && (
+            <div className="field">
+              <label>Turma (opcional)</label>
+              <select value={classId} onChange={(e) => setClassId(e.target.value)}>
+                <option value="">Nenhuma turma</option>
+                {availableClasses.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="field">
             <label>Código externo (opcional)</label>
             <input
@@ -142,6 +179,10 @@ export default function StudentsPage() {
             ) : (
               students.map((student) => {
                 const school = schools.find(s => s.id === student.school_id);
+                const enrollment = classes.find(c => {
+                   // This is inefficient but without an enrollment list we can't easily show the class
+                   return false; 
+                });
                 return (
                   <li key={student.id} className="list-item">
                     <div style={{ display: 'flex', flexDirection: 'column' }}>

@@ -22,6 +22,10 @@ class KnexSchoolRepository extends SchoolRepository {
       .where('school_memberships.user_id', userId)
       .select('schools.*', 'school_memberships.role_in_school');
   }
+
+  async deleteSchool(id) {
+    return await db('schools').where({ id }).del();
+  }
 }
 
 module.exports = KnexSchoolRepository;

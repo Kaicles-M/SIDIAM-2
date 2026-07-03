@@ -12,7 +12,7 @@ class PedagogicalRecordController {
   }
 
   async create(req, res) {
-    const { student_id, class_id, topic, category, description, importance, action_taken } = req.body;
+    const { student_id, class_id, topic, category, description, importance, action_taken, record_type, skill_code, event_date } = req.body;
     try {
       const r = await this.createPedagogicalRecordUseCase.execute({
         student_id,
@@ -21,7 +21,10 @@ class PedagogicalRecordController {
         category,
         description,
         importance,
-        action_taken
+        action_taken,
+        record_type,
+        skill_code,
+        event_date
       });
       res.status(201).json(r);
     } catch (err) {

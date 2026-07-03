@@ -16,6 +16,10 @@ class KnexClassRepository extends ClassRepository {
   async getClass(id) {
     return await db('classes').where({ id }).first();
   }
+
+  async deleteClass(id) {
+    return await db('classes').where({ id }).del();
+  }
 }
 
 module.exports = KnexClassRepository;

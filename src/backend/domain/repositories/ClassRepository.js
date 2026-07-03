@@ -10,6 +10,10 @@ class ClassRepository {
   async getClass(id) {
     throw new Error('Method not implemented');
   }
+
+  async deleteClass(id) {
+    throw new Error('Method not implemented');
+  }
 }
 
 module.exports = ClassRepository;

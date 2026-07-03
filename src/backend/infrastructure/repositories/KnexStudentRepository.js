@@ -29,6 +29,10 @@ class KnexStudentRepository extends StudentRepository {
       .andWhere('student_enrollments.status', 'active')
       .select('students.*');
   }
+
+  async deleteStudent(id) {
+    return await db('students').where({ id }).del();
+  }
 }
 
 module.exports = KnexStudentRepository;

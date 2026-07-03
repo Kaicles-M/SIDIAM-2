@@ -20,4 +20,12 @@ connectMongo();
 
 app.use('/api', routes);
 
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ error: 'JSON inválido na requisição.' });
+  }
+
+  next(err);
+});
+
 module.exports = app;
